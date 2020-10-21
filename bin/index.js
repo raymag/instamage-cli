@@ -2,6 +2,8 @@
 const { program } = require('commander');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const fetch = require('node-fetch')
 const chalk = require('chalk');
 const figlet = require('figlet');
@@ -62,11 +64,7 @@ const downloadImages = async (paths, prefix, directory) => {
         try {
             const response = await fetch(path);
             const buffer = await response.buffer();
-            var saveDirectory = directory;
-            if (directory) {
-                saveDirectory = '.';
-            }
-            fs.writeFile(`${saveDirectory}/${prefix}/${prefix}_${i}.jpg`, buffer, () => console.log(`- Finished downloading ${prefix}_${i}.jpg`));
+            fs.writeFile(`${directory}/${prefix}/${prefix}_${i}.jpg`, buffer, () => console.log(`- Finished downloading ${prefix}_${i}.jpg`));
         } catch (error) {
             console.log(`- You might want to check ${path}...`);
         }
@@ -74,14 +72,14 @@ const downloadImages = async (paths, prefix, directory) => {
 }
 
 const formatDirectoryPath = (directory) => {
-    if (directory) {
-        directory = directory.replace(/\\/g, "/");
-        if (directory.charAt(directory.length-1) === '/'){
-            return directory.substr(0, directory.length-1);
-        }
-    } else {
-        return '.';
+    if (!directory) {
+        directory = path.join(os.homedir(), "Desktop");
     }
+    directory = directory.replace(/\\/g, "/");
+    if (directory.charAt(directory.length-1) === '/'){
+        directory = directory.substr(0, directory.length-1);
+    }
+    return directory;
 }
 
 const downloadImagesFromInstagram = (username, directory) => {
@@ -99,8 +97,8 @@ const downloadImagesFromInstagram = (username, directory) => {
         directory = formatDirectoryPath(directory);
         console.log("Scrapping for images links...");
         const imgs = await autoScroll(page);
-        await downloadImages(imgs, username, directory);
-      
+        downloadImages(imgs, username, directory);
+
         await browser.close();
       })();
 }
