@@ -3,10 +3,21 @@ const { program } = require('commander');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const fetch = require('node-fetch')
+const chalk = require('chalk');
+const figlet = require('figlet');
 
-program.option('-u, --username <username>', 'Instagram username');
-program.option('-d, --directory <directory>', 'Directory to save images');
-program.parse(process.argv);
+figlet('InstaMage', (err, data) => {
+    console.log(chalk.yellow(data))
+})
+
+program
+    .version('1.0.0')
+    .description('Downloads pictures from a given instagram username.')
+    .option('-u, --username <username>', 'Instagram username')
+    .option('-d, --directory <directory>', 'Directory to save images')
+    .parse(process.argv);
+
+if (process.argv.length == 2) console.log(program.helpInformation());
 
 const autoScroll = async (page) => {
     return await page.evaluate(async () => {
